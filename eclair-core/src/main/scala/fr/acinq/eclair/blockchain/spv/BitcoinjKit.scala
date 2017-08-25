@@ -1,6 +1,7 @@
 package fr.acinq.eclair.blockchain.spv
 
 import java.io.File
+import java.net.InetSocketAddress
 
 import akka.actor.ActorSystem
 import fr.acinq.bitcoin.Transaction
@@ -10,7 +11,7 @@ import fr.acinq.eclair.blockchain.{CurrentBlockCount, NewConfidenceLevel}
 import grizzled.slf4j.Logging
 import org.bitcoinj.core.TransactionConfidence.ConfidenceType
 import org.bitcoinj.core.listeners._
-import org.bitcoinj.core.{NetworkParameters, Peer, StoredBlock, Transaction => BitcoinjTransaction}
+import org.bitcoinj.core.{NetworkParameters, Peer, PeerAddress, StoredBlock, Transaction => BitcoinjTransaction}
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.{RegTestParams, TestNet3Params}
 import org.bitcoinj.wallet.Wallet
@@ -20,7 +21,12 @@ import scala.concurrent.Promise
 /**
   * Created by PM on 09/07/2017.
   */
-class BitcoinjKit(chain: String, datadir: File)(implicit system: ActorSystem) extends WalletAppKit(chain2Params(chain), datadir, "bitcoinj", true) with Logging {
+class BitcoinjKit(chain: String, datadir: File, staticPeers: List[InetSocketAddress] = Nil)(implicit system: ActorSystem) extends WalletAppKit(chain2Params(chain), datadir, "bitcoinj", true) with Logging {
+
+  if (staticPeers.size > 0) {
+    logger.info(s"using staticPeers=${staticPeers.mkString(",")}")
+    setPeerNodes(staticPeers.map(addr => new PeerAddress(params, addr)).head)
+  }
 
   // tells us when the peerGroup/chain/wallet are accessible
   private val initializedPromise = Promise[Boolean]()

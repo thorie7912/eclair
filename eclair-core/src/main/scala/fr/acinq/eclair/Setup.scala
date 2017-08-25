@@ -15,7 +15,7 @@ import fr.acinq.eclair.blockchain._
 import fr.acinq.eclair.blockchain.fee.{BitpayInsightFeeProvider, ConstantFeeProvider}
 import fr.acinq.eclair.blockchain.rpc.{BitcoinJsonRPCClient, ExtendedBitcoinClient}
 import fr.acinq.eclair.blockchain.spv.BitcoinjKit
-import fr.acinq.eclair.blockchain.wallet.{BitcoinCoreWallet, BitcoinjWallet}
+import fr.acinq.eclair.blockchain.wallet.{BitcoinCoreWallet, BitcoinjWallet, EclairWallet}
 import fr.acinq.eclair.blockchain.zmq.ZMQActor
 import fr.acinq.eclair.channel.Register
 import fr.acinq.eclair.io.{Server, Switchboard}
@@ -58,7 +58,7 @@ class Setup(datadir: File, overrideDefaults: Config = ConfigFactory.empty(), act
       case "regtest" => Block.RegtestGenesisBlock.blockId
       case "test" => Block.TestnetGenesisBlock.blockId
     }
-    val bitcoinjKit = new BitcoinjKit(chain, datadir)
+    val bitcoinjKit = new BitcoinjKit(chain, datadir, staticPeers = new InetSocketAddress("localhost", 28333) :: Nil)
     (chain, chainHash, Left(bitcoinjKit))
   } else {
     val bitcoinClient = new ExtendedBitcoinClient(new BitcoinJsonRPCClient(
@@ -137,7 +137,8 @@ class Setup(datadir: File, overrideDefaults: Config = ConfigFactory.empty(), act
       router = router,
       switchboard = switchboard,
       paymentInitiator = paymentInitiator,
-      server = server)
+      server = server,
+      wallet = wallet)
 
     val api = new Service {
 
@@ -172,7 +173,8 @@ case class Kit(nodeParams: NodeParams,
                router: ActorRef,
                switchboard: ActorRef,
                paymentInitiator: ActorRef,
-               server: ActorRef)
+               server: ActorRef,
+               wallet: EclairWallet)
 
 case object BitcoinZMQConnectionTimeoutException extends RuntimeException("could not connect to bitcoind using zeromq")
 
