@@ -1,10 +1,12 @@
 package fr.acinq.eclair.channel
 
-
 import akka.actor.{ActorRef, FSM, LoggingFSM, OneForOneStrategy, Props, Status, SupervisorStrategy}
 import akka.event.Logging.MDC
 import akka.pattern.pipe
 import fr.acinq.bitcoin.Crypto.PublicKey
+import akka.actor.{ActorRef, DiagnosticActorLogging, FSM, LoggingFSM, OneForOneStrategy, Props, Status, SupervisorStrategy}
+import akka.event.Logging.MDC
+import fr.acinq.bitcoin.Crypto.{PrivateKey, PublicKey}
 import fr.acinq.bitcoin._
 import fr.acinq.eclair._
 import fr.acinq.eclair.blockchain._
